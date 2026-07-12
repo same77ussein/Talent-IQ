@@ -7,6 +7,8 @@ import { serve } from "inngest/express";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
 import { functions, inngest } from "./lib/inngest.js";
+import dns from 'node:dns';
+dns.setDefaultResultOrder('ipv4first');
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
