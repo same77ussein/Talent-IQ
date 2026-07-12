@@ -1,5 +1,7 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import cors from "cors";
 import { serve } from "inngest/express";
 import { ENV } from "./lib/env.js";
@@ -7,7 +9,10 @@ import { connectDB } from "./lib/db.js";
 import { functions, inngest } from "./lib/inngest.js";
 const app = express();
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "../..");
+const frontendDistPath = path.join(projectRoot, "frontend", "dist");
 
 // middleware
 app.use(express.json());
@@ -24,18 +29,23 @@ app.get("/health", (req, res) => {
 
 // Serve static files and handle routing for production
 if (ENV.NODE_ENV === "production") {
-  console.log("Running in production mode");
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-  app.get("/{*any}/", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
-  });
+  if (fs.existsSync(frontendDistPath)) {
+    console.log("Running in production mode with static frontend");
+    app.use(express.static(frontendDistPath));
+    app.get("/{*any}/", (req, res) => {
+      res.sendFile(path.join(frontendDistPath, "index.html"));
+    });
+  } else {
+    console.log("Running in production mode without static frontend build");
+  }
 }
 
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(ENV.PORT, async () => {
-      console.log(`Server is running on port ${ENV.PORT}`);
+    const port = Number(ENV.PORT) || 3000;
+    app.listen(port, async () => {
+      console.log(`Server is running on port ${port}`);
     });
   } catch (error) {
     console.error("❌ Error starting the server", error);
