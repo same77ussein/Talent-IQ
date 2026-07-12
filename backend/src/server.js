@@ -1,10 +1,10 @@
 import express from "express";
 import path from "path";
 import cors from "cors";
-import inngest from "inngest/express";
+import { serve } from "inngest/express";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
-import { functions } from "./lib/inggest.js";
+import { functions, inngest } from "./lib/inggest.js";
 const app = express();
 
 const __dirname = path.resolve();
