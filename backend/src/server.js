@@ -7,8 +7,8 @@ import { serve } from "inngest/express";
 import { ENV } from "./lib/env.js";
 import { connectDB } from "./lib/db.js";
 import { functions, inngest } from "./lib/inngest.js";
-import dns from 'node:dns';
-dns.setDefaultResultOrder('ipv4first');
+import dns from "node:dns";
+dns.setDefaultResultOrder("ipv4first");
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,11 +34,17 @@ if (ENV.NODE_ENV === "production") {
   if (fs.existsSync(frontendDistPath)) {
     console.log("Running in production mode with static frontend");
     app.use(express.static(frontendDistPath));
-    app.get("/{*any}/", (req, res) => {
+    app.get("/{*any}", (req, res) => {
       res.sendFile(path.join(frontendDistPath, "index.html"));
     });
   } else {
     console.log("Running in production mode without static frontend build");
+    app.get("/", (req, res) => {
+      res.status(200).json({
+        message: "Talent-IQ API is running",
+        health: "/health",
+      });
+    });
   }
 }
 
